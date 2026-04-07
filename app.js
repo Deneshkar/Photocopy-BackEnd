@@ -12,12 +12,16 @@ function createApp() {
 
   app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+  // Existing routes
   app.use("/api/auth", require("./routes/authRoutes"));
   app.use("/api/users", require("./routes/userRoutes"));
   app.use("/api/products", require("./routes/productRoutes"));
   app.use("/api/orders", require("./routes/orderRoutes"));
   app.use("/api/print-requests", require("./routes/printRequestRoutes"));
   app.use("/api/dashboard", require("./routes/dashboardRoutes"));
+
+  // New AI route
+  app.use("/api/ai", require("./routes/aiRoutes"));
 
   app.get("/api/health", (req, res) => {
     res.status(200).json({
