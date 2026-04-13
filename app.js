@@ -19,6 +19,7 @@ function createApp() {
   app.use("/api/orders", require("./routes/orderRoutes"));
   app.use("/api/print-requests", require("./routes/printRequestRoutes"));
   app.use("/api/dashboard", require("./routes/dashboardRoutes"));
+  app.use("/api/profit", require("./routes/profitRoutes"));
 
   // New AI route
   app.use("/api/ai", require("./routes/aiRoutes"));
