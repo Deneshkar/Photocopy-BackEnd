@@ -1,75 +1,67 @@
-# Photocopy Backend
+# Photocopy Shop Backend API
 
-Backend API for a photocopy shop system built with Node.js, Express, and MongoDB. It provides authentication, user management, product catalog management, order processing, print request handling, dashboard reporting, and local file uploads.
+Production-ready REST API for a photocopy shop workflow, built with Node.js, Express, and MongoDB.
 
-## Features
+This service handles:
 
-- JWT-based authentication with customer and admin roles
-- Product CRUD with stock and availability tracking
-- Order creation with stock reservation and rollback protection
-- Print request uploads with status management
-- Admin dashboard summary and low-stock reporting
-- Basic API smoke tests with `node:test` and `supertest`
+- authentication and authorization
+- product catalog management
+- order processing with stock consistency
+- print request uploads and lifecycle tracking
+- admin dashboard reporting
+- lightweight AI print-assist suggestions
+
+## Table of Contents
+
+- Overview
+- Tech Stack
+- Key Capabilities
+- Project Structure
+- Prerequisites
+- Quick Start
+- Environment Variables
+- Scripts
+- Authentication and Authorization
+- API Endpoints
+- Query Filters
+- File Uploads
+- Business Rules
+- Testing
+- Error Handling
+- Security Notes
+
+## Overview
+
+Base URL (local):
+
+```text
+http://localhost:5000
+```
+
+Health checks:
+
+- `GET /`
+- `GET /api/health`
 
 ## Tech Stack
 
 - Node.js
 - Express 5
-- MongoDB with Mongoose
-- JSON Web Tokens
-- Multer for file uploads
-- Nodemon for local development
+- MongoDB + Mongoose
+- JSON Web Token (JWT)
+- Multer (multipart file uploads)
+- bcryptjs (password hashing)
+- node:test + supertest (testing)
+- nodemon (local development)
 
-## Getting Started
+## Key Capabilities
 
-### 1. Install dependencies
-
-```bash
-npm install
-```
-
-### 2. Create environment file
-
-Copy `.env.example` to `.env` and fill in your real values.
-
-```bash
-PORT=5000
-MONGO_URL=your-mongodb-connection-string
-JWT_SECRET=your-strong-secret
-NODE_ENV=development
-```
-
-### 3. Start the server
-
-Development mode:
-
-```bash
-npm run dev
-```
-
-Production mode:
-
-```bash
-npm start
-```
-
-The API runs on `http://localhost:5000` by default.
-
-## Available Scripts
-
-- `npm run dev`: start the server with nodemon
-- `npm start`: start the server with Node.js
-- `npm test`: run the automated tests
-- `npm run check`: run syntax validation, then tests
-
-## Environment Variables
-
-| Variable | Required | Description |
-| --- | --- | --- |
-| `PORT` | No | Server port. Defaults to `5000`. |
-| `MONGO_URL` | Yes | MongoDB connection string used by Mongoose. |
-| `JWT_SECRET` | Yes | Secret used to sign and verify JWT tokens. |
-| `NODE_ENV` | No | Runtime environment, usually `development` or `production`. |
+- JWT login and role-based access (`customer`, `admin`)
+- Full product CRUD for admins, public product browsing for customers
+- Order creation with stock deduction and rollback safeguards
+- Print requests with file upload and status transitions
+- Admin dashboards for summary metrics and low-stock products
+- AI print-assist endpoint for print setting suggestions
 
 ## Project Structure
 
@@ -78,112 +70,190 @@ The API runs on `http://localhost:5000` by default.
 |-- app.js
 |-- server.js
 |-- config/
+|   `-- db.js
 |-- controllers/
 |-- middleware/
 |-- models/
 |-- routes/
+|-- services/
 |-- scripts/
+|   `-- check.js
 |-- tests/
+|   `-- app.test.js
 `-- uploads/
 ```
 
-- `app.js`: creates the Express app and wires routes and middleware
-- `server.js`: loads environment variables, connects to MongoDB, and starts the HTTP server
-- `config/`: database bootstrap code
-- `controllers/`: request handlers for auth, users, products, orders, print requests, and dashboard data
-- `middleware/`: async wrapper, auth checks, upload handling, and error handling
-- `models/`: Mongoose schemas for users, products, orders, and print requests
-- `routes/`: route modules grouped by domain
-- `scripts/`: maintenance and validation scripts
-- `tests/`: API smoke tests
-- `uploads/`: uploaded files served statically from `/uploads`
+Core files:
 
-## Authentication
+- `app.js`: Express app factory, middleware registration, route mounting
+- `server.js`: environment loading, DB connection, HTTP bootstrapping
+- `config/db.js`: MongoDB connection logic
 
-- Protected routes expect `Authorization: Bearer <token>`
-- Users are assigned a role of either `customer` or `admin`
-- Admin-only routes are protected by the `adminOnly` middleware
+## Prerequisites
 
-## API Routes
+- Node.js 18+
+- npm 9+
+- MongoDB instance (local or cloud)
 
-Base URL: `http://localhost:5000`
+## Quick Start
 
-### Public Routes
+1. Install dependencies
 
-- `GET /`: backend status message
-- `GET /api/health`: health check
-- `POST /api/auth/register`: register a new user
-- `POST /api/auth/login`: authenticate a user and return a JWT
-- `GET /api/products`: list all products with optional filters
-- `GET /api/products/:id`: get a single product
+```bash
+npm install
+```
 
-### Authenticated User Routes
+2. Create a `.env` file in the project root
 
-- `GET /api/users/profile`: get the logged-in user profile
-- `POST /api/orders`: create an order
-- `GET /api/orders/my-orders`: get orders for the logged-in user
-- `GET /api/orders/:id`: get a single order if owned by the user or requested by an admin
-- `POST /api/print-requests`: create a print request with file upload
-- `GET /api/print-requests/my-requests`: get print requests for the logged-in user
-- `GET /api/print-requests/:id`: get a single print request if owned by the user or requested by an admin
+```env
+PORT=5000
+MONGO_URL=your-mongodb-connection-string
+JWT_SECRET=your-strong-secret
+NODE_ENV=development
+```
 
-### Admin Routes
+3. Start the API
 
-- `GET /api/users`: list users
-- `GET /api/users/:id`: get a single user
-- `PUT /api/users/:id`: update a user
-- `DELETE /api/users/:id`: delete a user
-- `POST /api/products`: create a product
-- `PUT /api/products/:id`: update a product
-- `DELETE /api/products/:id`: delete a product
-- `GET /api/orders`: list all orders
-- `PUT /api/orders/:id/status`: update order status
-- `GET /api/print-requests`: list all print requests
-- `PUT /api/print-requests/:id/status`: update print request status
-- `DELETE /api/print-requests/:id`: delete a print request
-- `GET /api/dashboard/summary`: get dashboard totals and revenue summary
-- `GET /api/dashboard/low-stock`: get low-stock products
+```bash
+npm run dev
+```
 
-## Query Parameters
+For production-style run:
 
-Supported filters currently include:
+```bash
+npm start
+```
+
+## Environment Variables
+
+| Variable     | Required | Description                                         |
+| ------------ | -------- | --------------------------------------------------- |
+| `PORT`       | No       | HTTP server port. Defaults to `5000`.               |
+| `MONGO_URL`  | Yes      | MongoDB connection string used by Mongoose.         |
+| `JWT_SECRET` | Yes      | Secret used to sign JWT access tokens.              |
+| `NODE_ENV`   | No       | Runtime mode (`development`, `production`, `test`). |
+
+## Scripts
+
+- `npm run dev`: start server with nodemon
+- `npm start`: start server with Node.js
+- `npm test`: run tests (`node --test`)
+- `npm run check`: run syntax check script and then tests
+
+## Authentication and Authorization
+
+Auth model:
+
+- login/register returns JWT token
+- protected routes require header: `Authorization: Bearer <token>`
+- role checks enforce admin-only resources
+
+Roles:
+
+- `customer`: can view products, place orders, create and view own print requests, view own orders
+- `admin`: full access to users, products, order administration, print request administration, dashboard analytics
+
+## API Endpoints
+
+### Public
+
+- `GET /`
+- `GET /api/health`
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `GET /api/products`
+- `GET /api/products/:id`
+- `POST /api/ai/print-assist`
+
+### Authenticated User
+
+- `GET /api/users/profile`
+- `POST /api/orders`
+- `GET /api/orders/my-orders`
+- `GET /api/orders/:id`
+- `POST /api/print-requests` (multipart form-data with file)
+- `GET /api/print-requests/my-requests`
+- `GET /api/print-requests/:id`
+
+### Admin
+
+- `GET /api/users`
+- `GET /api/users/:id`
+- `PUT /api/users/:id`
+- `DELETE /api/users/:id`
+- `POST /api/products`
+- `PUT /api/products/:id`
+- `DELETE /api/products/:id`
+- `GET /api/orders`
+- `PUT /api/orders/:id/status`
+- `GET /api/print-requests`
+- `PUT /api/print-requests/:id/status`
+- `DELETE /api/print-requests/:id`
+- `GET /api/dashboard/summary`
+- `GET /api/dashboard/low-stock`
+
+## Query Filters
+
+Supported query parameters:
 
 - Products: `search`, `category`, `isAvailable`, `minPrice`, `maxPrice`
 - Users: `search`, `role`
 - Orders: `status`, `customerName`
 - Print requests: `status`, `customerName`, `printType`, `paperSize`
 
-## Uploads
+## File Uploads
 
-- Uploaded files are stored in the local `uploads/` directory
-- Static file access is exposed through `/uploads`
-- Allowed upload types: `.pdf`, `.doc`, `.docx`, `.png`, `.jpg`, `.jpeg`
-- Maximum upload size: `10MB`
+Upload behavior:
+
+- storage location: `uploads/`
+- static access path: `/uploads`
+- field name for single-file uploads: `file`
+
+Accepted extensions:
+
+- `.pdf`, `.doc`, `.docx`, `.png`, `.jpg`, `.jpeg`
+
+Max file size:
+
+- `10 MB`
 
 ## Business Rules
 
-- Order creation decreases product stock immediately
+- Creating an order immediately decrements product stock
 - If order creation fails after stock reservation, stock is rolled back
-- Products are automatically marked unavailable when stock reaches zero
-- Print request statuses: `pending`, `accepted`, `printing`, `completed`, `rejected`
+- Products are marked unavailable when stock reaches zero
 - Order statuses: `pending`, `processing`, `completed`, `cancelled`
+- Print request statuses: `pending`, `accepted`, `printing`, `completed`, `rejected`
 
 ## Testing
 
-Current automated coverage is lightweight and focuses on smoke tests:
+Run tests:
 
-- `GET /api/health`
-- `GET /`
-- Unknown route error handling
+```bash
+npm test
+```
 
-Run all validation with:
+Run full local validation:
 
 ```bash
 npm run check
 ```
 
-## Notes
+Current automated tests cover:
 
-- Real uploaded assets are ignored by git; only `uploads/.gitkeep` is tracked
-- Local secrets are not committed; use `.env.example` as the template
-- This project currently uses simple controller-level validation rather than a dedicated schema validation layer
+- API health endpoint
+- root endpoint
+- unknown-route error flow
+
+## Error Handling
+
+- Unknown routes are handled by centralized `notFound` middleware
+- Runtime and validation errors are normalized by centralized error middleware
+- In development, stack traces may be included for easier debugging
+
+## Security Notes
+
+- Do not commit real secrets; keep `.env` local
+- Use a strong, random `JWT_SECRET`
+- Uploaded files are validated by extension and size, but should still be treated as untrusted content
+- This project currently performs validation mostly at controller level; consider adding schema validation for stricter input safety
