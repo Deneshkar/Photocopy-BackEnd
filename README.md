@@ -9,6 +9,7 @@ This service handles:
 - order processing with stock consistency
 - print request uploads and lifecycle tracking
 - admin dashboard reporting
+- profit tracking with manual income/expense entries
 - lightweight AI print-assist suggestions
 
 ## Table of Contents
@@ -61,6 +62,7 @@ Health checks:
 - Order creation with stock deduction and rollback safeguards
 - Print requests with file upload and status transitions
 - Admin dashboards for summary metrics and low-stock products
+- Profit summary combining completed-order revenue and manual entries
 - AI print-assist endpoint for print setting suggestions
 
 ## Project Structure
@@ -151,7 +153,7 @@ Auth model:
 Roles:
 
 - `customer`: can view products, place orders, create and view own print requests, view own orders
-- `admin`: full access to users, products, order administration, print request administration, dashboard analytics
+- `admin`: full access to users, products, order administration, print request administration, dashboard analytics, profit management
 
 ## API Endpoints
 
@@ -191,6 +193,11 @@ Roles:
 - `DELETE /api/print-requests/:id`
 - `GET /api/dashboard/summary`
 - `GET /api/dashboard/low-stock`
+- `GET /api/profit/summary`
+- `GET /api/profit/entries`
+- `POST /api/profit/entries`
+- `PUT /api/profit/entries/:id`
+- `DELETE /api/profit/entries/:id`
 
 ## Query Filters
 
@@ -208,6 +215,10 @@ Upload behavior:
 - storage location: `uploads/`
 - static access path: `/uploads`
 - field name for single-file uploads: `file`
+- upload-enabled endpoints:
+  - `POST /api/print-requests`
+  - `POST /api/products`
+  - `PUT /api/products/:id`
 
 Accepted extensions:
 
